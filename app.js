@@ -25,22 +25,35 @@ const articleSchema = new Schema({
 });
 //model
 const Article = mongoose.model("Article" , articleSchema);
-
+//error
+function CustomException(message) {
+  const error = new Error(message); 
+  return error;
+}
 //using chained route handler express to handle same route for different methods
 ////////////////////////////Requesting targeting all articles/////////////////////////////////////////////
 app.route("/articles")
 .get((req,res)=>{
    Article.find({} , (error,foundArticle)=>{
+      const data = {
+          status:false,
+          data : null,
+          debugInfo :null
+        };
+        error = CustomException("fuck");
+        console.log();
     if(!error){
-        res.send(foundArticle);
+        data.status = true;
+        data.data = foundArticle;
+        res.send(data);
     }else{
-      console.error(error);
+      data.debugInfo =  error.message;
+      res.send(data);
     };
    })
 })
 .post((req,res)=>{
-    console.log(req.body.title);
-    console.log(req.body.content);
+  
     Article.create({title :req.body.title, content:req.body.content } ,(err)=>{
       if(!err){
         res.send("Added successfully");
@@ -62,7 +75,9 @@ app.route("/articles")
 app.route("/articles/:articleTitle")
 .get((req,res)=>{
   Article.findOne({title : req.params.articleTitle} , (err,foundItem)=>{
+ 
     if(foundItem){
+      
       res.send(foundItem);
     }else{
       res.send("Item not found");       
@@ -102,7 +117,7 @@ app.route("/articles/:articleTitle")
 
 
 connectDB().then(()=>{
-app.listen(8000, function () {
+app.listen(3000, function () {
   console.log("Server started on port 3000");
 });
 })
